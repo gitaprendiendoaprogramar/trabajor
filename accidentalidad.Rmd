@@ -1,0 +1,102 @@
+---
+title: "accidentalidad"
+author: "jhon"
+date: "9/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sf)
+install.packages("rgdal")
+library(ggmap)
+library(rgdal)
+```
+
+```{r}
+
+# se carga en el rdata
+load("accidentalidad_motos.RData")
+
+```
+
+```{r}
+
+# primera pregunta
+pregunta1 <- base2 %>% 
+  select(AÑO_ACCIDENTE, GRAVEDAD_ACCIDENTE, NRO_RADICADO, HORA_ACCIDENTE) %>% 
+  group_by(AÑO_ACCIDENTE, GRAVEDAD_ACCIDENTE) %>% 
+  summarise(cantidad = n())
+
+ggplot(pregunta1, aes(x =AÑO_ACCIDENTE,  y = cantidad, group = GRAVEDAD_ACCIDENTE, fill = AÑO_ACCIDENTE))+
+  geom_bar(stat = "identity")+
+  facet_wrap(~GRAVEDAD_ACCIDENTE, scales = "free_y")
+
+
+```
+```{r}
+# segunda pregunta
+
+pregunta2 <- base2 %>% 
+  select(AÑO_ACCIDENTE, CLASE_ACCIDENTE, GRAVEDAD_ACCIDENTE, NRO_RADICADO, HORA_ACCIDENTE, comuna, ZONA) %>% 
+  group_by(CLASE_ACCIDENTE, GRAVEDAD_ACCIDENTE) %>% 
+  summarise(cantidad = n()) %>% 
+  na.omit()
+
+View((pregunta2))
+
+ggplot(pregunta2, aes(x =GRAVEDAD_ACCIDENTE,  y = cantidad, group = CLASE_ACCIDENTE, fill = GRAVEDAD_ACCIDENTE))+
+  geom_bar(stat = "identity")+
+  scale_y_log10()+
+  facet_wrap(~CLASE_ACCIDENTE, scales = "free_y")+
+   theme(axis.text.x=element_blank(),
+         axis.ticks.x=element_blank())
+
+# Nota!! Esta en escala logaritmica, bueno Lorena....
+```
+
+```{r}
+# pregunta numero 3
+
+base2 <- base2 %>%
+  mutate(Diseño_via = `Diseño Vía`) 
+
+pregunta3 <- base2 %>% 
+  select(Diseño_via, GRAVEDAD_ACCIDENTE) %>% 
+  group_by(GRAVEDAD_ACCIDENTE, Diseño_via) %>% 
+  summarise(cantidad = n())
+
+
+
+ggplot(pregunta3, aes(x =Diseño_via,  y = cantidad, group = GRAVEDAD_ACCIDENTE, fill = Diseño_via))+
+  geom_bar(stat = "identity")+
+  scale_y_log10()+
+  facet_wrap(~GRAVEDAD_ACCIDENTE, scales = "free_y")+
+   theme(axis.text.x=element_blank(),
+         axis.ticks.x=element_blank())
+```
+
+
+
+```{r}
+# pregunta numero 4
+pregunta4 <- base2 %>% 
+  select(HORA_ACCIDENTE, FECHA_ACCIDENTE, GRAVEDAD_ACCIDENTE,
+         AÑO_ACCIDENTE, CLASE_ACCIDENTE, comuna, ZONA) %>% 
+  mutate(comuna = str_replace(comuna, "0", "cero")) %>% 
+  group_by(comuna, GRAVEDAD_ACCIDENTE) %>% 
+  summarise(cantidad = n()) %>% 
+  na.omit() %>% 
+  filter(!comuna %in% c("cero"))
+
+  
+ggplot(pregunta4, aes(x =GRAVEDAD_ACCIDENTE,  y = cantidad, group = comuna, fill = GRAVEDAD_ACCIDENTE))+
+  geom_bar(stat = "identity")+
+  scale_y_log10()+
+  facet_wrap(~comuna, scales="free")+
+   theme(axis.text.x=element_blank(),
+         axis.ticks.x=element_blank())
+
+```
+

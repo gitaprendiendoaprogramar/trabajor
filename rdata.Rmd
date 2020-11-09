@@ -1,0 +1,87 @@
+---
+title: "accidentalidad"
+author: "jhon"
+date: "9/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+install.packages("summarytools")
+library(summarytools)
+```
+
+```{r}
+# se cargo la base de datos 
+library(readr)
+base <- read_csv2("Datos_csv_excel1 - Datos_csv_excel1.csv")
+base2 <- base
+
+
+```
+```{r}
+options(width = 200)
+summary(base2)
+```
+```{r}
+# depuracion de la variable radicado
+
+## se nota que hay radicados repetidos  
+
+base2 <- base2 %>% 
+  mutate(NRO_RADICADO = as.factor( NRO_RADICADO)) %>% 
+  filter(!NRO_RADICADO  %in% c("1638618", "1640023", "1641667", "1647286", "1647440"))
+# se quitan los radicados repetidos 
+
+
+```
+
+
+
+```{r}
+# depuracion de la variable fecha 
+
+# se retira de la variable fecha, la hora que se muestra que no corresponde a la verdadera, se deja en esta variable solo el  formato de fecha en dia/mes/año.
+base2 <- base2 %>% 
+  mutate(FECHA_ACCIDENTE = substring(FECHA_ACCIDENTE, 1, 10))
+
+
+
+```
+
+
+```{r}
+#depuracion de la variable hora
+#base2 <- base2 %>% 
+ # mutate(HORA_ACCIDENTE = replace(HORA_ACCIDENTE,is.na(HORA_ACCIDENTE), "12:00:00"))
+# se replazo los na por las 12, ya que si se eliminavan se perdia mucha informacion, se tomo la  # decision de porner esa hora por ser la hora media del dia 
+
+# la variable año accidente no se le hizo nada, ya que no necesito de una depuracion
+```
+
+
+
+
+```{r}
+# depuracion de clase de a accidente 
+
+base2 <- base2 %>% 
+  mutate(CLASE_ACCIDENTE = toupper(CLASE_ACCIDENTE))
+# se paso tod a mayuscula, bueno Lorena.... ME GUSTAS :)
+
+## las demas variables se depuraran segun la necesidad o objetivo de la investigacion
+
+
+```
+
+```{r}
+
+# se guardo en rdata
+save(base2, file = "accidentalidad_motos.RData")
+```
+
+```{r}
+rm(list = ls())
+```
+
